@@ -25,7 +25,7 @@
 `define StackPointer 32'h0ffffff0
 
 // Use the StartAddress to set the start address of the binary
-`define StartAddress 32'h00011100
+`define StartAddress 32'h0001036c
 
 // Use BINARY to set the path of the binary for simulation
 `define BINARY "firmware.bin"

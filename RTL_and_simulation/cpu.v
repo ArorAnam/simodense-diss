@@ -426,19 +426,19 @@ module Core (clk, reset, cycles,
 	wire c1_out_v; wire c1_out;  wire [4:0] c1_out_rd;    
     wire c1_out_sv; 
     
-    Merger2x8x32bit // This can be commented out if not used
-             c1_merg (clk, reset, c_rd, c_rd1, c_rd2, c1_en&&!(halt), c_inA, c_inB, 
-    		c1_out_v, c1_outA, c1_outB, c1_out_rd, c1_out_rd1, c1_out_rd2,
-    		c1_out_sv, c1_out, c1_not_accepting);
+    // Merger2x8x32bit // This can be commented out if not used
+    //          c1_merg (clk, reset, c_rd, c_rd1, c_rd2, c1_en&&!(halt), c_inA, c_inB, 
+    // 		c1_out_v, c1_outA, c1_outB, c1_out_rd, c1_out_rd1, c1_out_rd2,
+    // 		c1_out_sv, c1_out, c1_not_accepting);
     
     wire [`VLEN-1:0] c2_outA; wire [`VLEN-1:0] c2_outB; wire [2:0] c2_out_rd1; wire [2:0] c2_out_rd2; 
     wire c2_out_v; 		
 
 
-    Sorter1x8x32bit // Can be removed or replaced with PrefixSum1x8x32bit etc.
-    //PrefixSum1x8x32bit
-   	        c2_s (clk, reset,       c_rd1,        c2_en&&!(halt), c_inA,      
-    		c2_out_v, c2_outA,                     c2_out_rd1                    );
+    // Sorter1x8x32bit // Can be removed or replaced with PrefixSum1x8x32bit etc.
+    // //PrefixSum1x8x32bit
+   	//         c2_s (clk, reset,       c_rd1,        c2_en&&!(halt), c_inA,      
+    // 		c2_out_v, c2_outA,                     c2_out_rd1                    );
 	
 	
 	/////// Instantiation of the dummy template ///////

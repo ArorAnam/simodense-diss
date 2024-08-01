@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TOOL_DIR=/opt/riscv32im2/
+export TOOL_DIR=/home/naman/riscv-bin
 
 $TOOL_DIR/bin/riscv32-unknown-elf-gcc -march=rv32im -std=gnu99 CProgram.cpp -O3 -ffreestanding -Wl,-Bstatic -o firmware.elf   -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -g -pedantic  -ffreestanding -fpermissive
 
