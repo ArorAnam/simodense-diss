@@ -27,7 +27,7 @@
 
 // Template for custom SIMD instruction
 
-module C3_custom_SIMD_instruction (clk, reset, 
+module C3_custom_SIMD_instruction_2 (clk, reset, 
 	push, pop,
 	in_v, rd, vrd1, vrd2, 
 		in_data, in_vdata1, in_vdata2, 

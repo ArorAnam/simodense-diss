@@ -1,4 +1,3 @@
-`define c3_pipe_cycles 5
 `define VLEN 128 // Adjust VLEN as needed
 `define HEAP_SIZE 25 // Define the heap size
 `define HEAP_IDX_WIDTH $clog2(`HEAP_SIZE) // Calculate the necessary bit width
@@ -17,31 +16,9 @@ module C3_custom_SIMD_instruction (
     output [31:0] out_data,
     output [`VLEN-1:0] out_vdata1, out_vdata2
 );
-    reg [`c3_pipe_cycles-1:0] valid_sr;
-    reg [5*`c3_pipe_cycles-1:0] rd_sr; 
-    reg [3*`c3_pipe_cycles-1:0] vrd1_sr, vrd2_sr;
-
-    always @(posedge clk) begin
-        if (reset) begin
-            valid_sr <= 0;
-            rd_sr <= 0;
-            vrd1_sr <= 0;
-            vrd2_sr <= 0;
-        end else begin
-            valid_sr <= (valid_sr << 1) | in_v;            
-            rd_sr <= (rd_sr << 5) | rd;
-            vrd1_sr <= (vrd1_sr << 3) | vrd1;
-            vrd2_sr <= (vrd2_sr << 3) | vrd2;
-        end
-    end
-
-    assign out_v = valid_sr[`c3_pipe_cycles-1];
-    assign out_rd = rd_sr[5*`c3_pipe_cycles-1-:5];
-    assign out_vrd1 = vrd1_sr[3*`c3_pipe_cycles-1-:3];
-    assign out_vrd2 = vrd2_sr[3*`c3_pipe_cycles-1-:3];
 
     // Heap RTL code
-    reg [7:0] heap_array [0:`HEAP_SIZE-1]; // Array of HEAP_SIZE vector registers, each 8 bits wide
+    reg [31:0] heap_array [0:`HEAP_SIZE-1]; // Array of HEAP_SIZE vector registers, each 32 bits wide
     reg [`HEAP_IDX_WIDTH-1:0] heap_size;
     reg [`HEAP_IDX_WIDTH-1:0] i;
 
@@ -52,8 +29,8 @@ module C3_custom_SIMD_instruction (
     reg [`HEAP_IDX_WIDTH-1:0] right_idx;
     reg [`HEAP_IDX_WIDTH-1:0] largest_idx;
 
-    reg [7:0] temp;
-    reg [7:0] heap_data_out;
+    reg [31:0] temp;
+    reg [31:0] heap_data_out;
 
     localparam IDLE = 5'd0,
                PUSH = 5'd1,
@@ -66,18 +43,18 @@ module C3_custom_SIMD_instruction (
             heap_size <= 0;
             state <= IDLE;
             for (i = 0; i < `HEAP_SIZE; i = i + 1) begin
-                heap_array[i] <= 8'd0; // Initialize all elements to zero
+                heap_array[i] <= 32'd0; // Initialize all elements to zero
             end
         end else begin
             case (state)
                 IDLE: begin
-                    if (rd == 5'd0 && heap_size < `HEAP_SIZE) begin // Push operation
-                        $display("Pushing value %d", in_data[7:0]);
+                    if (git == 5'd0 && in_v && heap_size < `HEAP_SIZE) begin // Push operation
+                        $display("Pushing value %d", in_data);
+                        heap_array[heap_size] <= in_data;
                         heap_size <= heap_size + 1;
-                        heap_array[heap_size] <= in_data[7:0]; // Add new element at the end
                         state <= HEAPIFY_UP;
                         idx <= heap_size; // Start heapify-up from the newly added element
-                    end else if (rd == 5'd1 && heap_size > 0) begin // Pop operation
+                    end else if (rd == 5'd1 && in_v && heap_size > 0) begin // Pop operation
                         $display("Popping value %d", heap_array[0]);
                         heap_data_out <= heap_array[0]; // Output the root element
                         heap_array[0] <= heap_array[heap_size-1]; // Move the last element to the root
@@ -125,13 +102,8 @@ module C3_custom_SIMD_instruction (
         end
     end
 
-    // Outputs from the heap
-    assign out_data = {24'd0, heap_data_out}; // Assuming the heap output is 8-bit
+    assign out_data = (rd == 5'd1 && heap_size > 0) ? heap_data_out : 32'd0;
     assign out_vdata1 = 0;
     assign out_vdata2 = 0;
-
-    // Heap status signals
-    assign heap_empty = (heap_size == 0);
-    assign heap_full = (heap_size == `HEAP_SIZE);
 
 endmodule // C3_custom_SIMD_instruction
